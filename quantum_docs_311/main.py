@@ -24,7 +24,7 @@ consumer_threads = []
 consumer_lock = Lock()
 agnt_cofig = load_agent_config()
 a = agnt_cofig.get("agent", {})
-m = a.get("mode_name", {})
+m = a.get("mode_name", "guymorganb/e5-large-v2-4096-lsg-patched")
 
 def consumer_worker(file_queue: FileQueue, cleaner: DocumentCleaner):
     logger.info(f"Document cleaning consumer {current_thread().name} started.")
@@ -77,8 +77,8 @@ def embedding_consumer_worker(clean_doc_queue: CleanDocQueue, embedder):
             logger.info(f"{current_thread().name} processing clean doc: {file_path}")
             
             # Use the embedder to embed the document.
-            result = embedder.embed_document(file_path)
-            logger.info(f"{current_thread().name} embedded result: {result}")
+            # result = embedder.embed_document(file_path)
+            # logger.info(f"{current_thread().name} embedded result: {result}")
             
             clean_doc_queue.queue.task_done()
         except Empty:

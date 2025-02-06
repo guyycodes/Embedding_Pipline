@@ -12,7 +12,8 @@ import yaml
 import questionary
 import logging
 from pathlib import Path
-import sys, os
+import sys
+import os
 
 # Ensure the project root is in the Python path.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,8 +26,8 @@ from src.vector_store.qdrant_config import QdrantManager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Updated configuration filename.
 CONFIG_FILENAME = "config.yml"
+
 
 def load_config(config_path: str = CONFIG_FILENAME) -> dict:
     """
@@ -39,6 +40,7 @@ def load_config(config_path: str = CONFIG_FILENAME) -> dict:
     with config_file.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
+
 def save_config(config_data: dict, config_path: str = CONFIG_FILENAME):
     """
     Saves config data to the specified YAML file.
@@ -46,6 +48,7 @@ def save_config(config_data: dict, config_path: str = CONFIG_FILENAME):
     with open(config_path, "w", encoding="utf-8") as f:
         yaml.dump(config_data, f, sort_keys=False)
     logger.info(f"✅ Configuration saved to {config_path}.")
+
 
 def update_configuration():
     """
@@ -76,7 +79,6 @@ def update_configuration():
         }
     if "processed_output_dir" not in current_config:
         current_config["processed_output_dir"] = "src/util/clean_docs"
-    # Ensure the qdrant section exists.
     if "qdrant" not in current_config:
         current_config["qdrant"] = {}
 
@@ -115,7 +117,7 @@ def update_configuration():
     if model_name == "Other (manually enter)":
         model_name = questionary.text("Enter the Hugging Face model identifier:").ask()
         vector_dim = int(questionary.text(
-            "Enter the vector dimension for the custom model (e.g., 768 or 1024, 1536 ):",
+            "Enter the vector dimension for the custom model (e.g., 768 or 1024, 1536):",
             default="768"
         ).ask())
     else:
@@ -148,9 +150,6 @@ def update_configuration():
     ).ask()
 
     # Update agent settings.
-    if "agent" not in current_config:
-        current_config["agent"] = {}
-
     current_config["agent"]["model_name"] = model_name
     current_config["agent"]["embedding_model"]["device"] = device
     current_config["agent"]["embedding_model"]["max_tokens"] = int(max_tokens)
@@ -167,6 +166,15 @@ def update_configuration():
 
     # Update Qdrant settings with the determined vector dimension.
     current_config["qdrant"]["dimension"] = vector_dim
+
+    # ------------------------ ADDED FOR QDRANT COLLECTION ------------------------
+    # Prompt user for the Qdrant collection name (default to whatever's in config, fallback "document_vectors")
+    collection_name = questionary.text(
+        "Enter Qdrant collection name (default: 'document_vectors'):",
+        default=current_config["qdrant"].get("collection", "document_vectors")
+    ).ask()
+    current_config["qdrant"]["collection"] = collection_name
+    # ----------------------------------------------------------------------------
 
     # Prompt for text splitting settings.
     chunk_size = questionary.text(
@@ -197,6 +205,7 @@ def update_configuration():
     # Save updated configuration.
     save_config(current_config, CONFIG_FILENAME)
     print("Configuration updated successfully.\n")
+
 
 def test_embedding_model():
     """
@@ -320,6 +329,7 @@ def main_menu():
         else:
             print("Exiting CLI. Goodbye!")
             break
+
 
 if __name__ == "__main__":
     main_menu()

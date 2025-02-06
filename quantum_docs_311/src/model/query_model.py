@@ -95,6 +95,13 @@ class QueryModel(HuggingFaceQuery):
         3. Optionally pass the question plus retrieved docs to a QA model (not shown).
         4. Return the retrieved document texts.
         """
+        # ---------- RE-LOAD CONFIG AND OVERRIDE COLLECTION_NAME ------------------------
+        config = load_agent_config()
+        qdrant_cfg = config.get("qdrant", {})
+        # if you want to force it to always use the YAML setting:
+        collection_name = qdrant_cfg.get("collection", collection_name)
+        # -------------------------------------------------------------------------------
+        
         query_vector = self.embed_query([question])[0]
         if not query_vector:
             logger.info("Failed to create embedding for the query.")
@@ -131,6 +138,12 @@ class QueryModel(HuggingFaceQuery):
         2. Search Qdrant for the top_k matches.
         3. Return a short snippet of each matched text along with its score.
         """
+        # ---------- RE-LOAD CONFIG AND OVERRIDE COLLECTION_NAME -----------------------
+        config = load_agent_config()
+        qdrant_cfg = config.get("qdrant", {})
+        collection_name = qdrant_cfg.get("collection", collection_name)
+        # -------------------------------------------------------------------------------
+        
         query_vector = self.embed_query([query])[0]
         if not query_vector:
             logger.info("Failed to create embedding for the query.")

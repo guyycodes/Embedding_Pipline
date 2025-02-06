@@ -1,7 +1,7 @@
 agent:
   model_name: guymorganb/e5-large-v2-4096-lsg-patched
   embedding_model:
-    batch_size: 64
+    batch_size: 32
     device: mps
     max_tokens: 4096
     timeout: 60
@@ -9,7 +9,7 @@ agent:
     device: mps
     max_tokens: 4096
     timeout: 60
-    top_k: 5
+    top_k: 7
 esg_pas_model: en_core_web_trf
 extract:
   esg: true
@@ -23,7 +23,7 @@ dirty_documents:
   pdf: pdf
   temp: temp
 qdrant:
-  collection: document_vectors
+  collection: default_store
   cloud_host: cloud-endpoint
   cloud_port: 443
   cloud_api_key: ''

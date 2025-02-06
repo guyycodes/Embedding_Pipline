@@ -98,6 +98,12 @@ class EmbeddingModel(HuggingFaceModel):
         Embed and upsert them into Qdrant, then return a short result message.
         """
         try:
+             # ---------- RE-LOAD CONFIG AND COLLECTION NAME - to pick up and changes ----------
+            config = load_agent_config()
+            qdrant_cfg = config.get("qdrant", {})
+            self.qdrant_collection = qdrant_cfg.get("collection", "document_vectors")
+            # -----------------------------------------------------------------------
+
             # Make sure our collection is ready
             QdrantManager.ensure_qdrant_collection(self.qdrant_collection)
             

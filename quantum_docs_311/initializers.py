@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Global cache for the embedding model.
-_MODEL_CACHE = {}
-QUERY_MODEL_CACHE = {}
+MODEL_CACHE = {}
+
 def warm_up_embedder(model_name: str, device: str = None) -> EmbeddingModel:
     """
     Instantiate and warm up the embedding model.
@@ -19,10 +19,10 @@ def warm_up_embedder(model_name: str, device: str = None) -> EmbeddingModel:
     triggers its warm-up by reading and processing finished documents from
     'src/util/clean_docs', and caches the instance so that subsequent calls will reuse it.
     """
-    global _MODEL_CACHE
-    if model_name in _MODEL_CACHE:
+    global MODEL_CACHE
+    if model_name in MODEL_CACHE:
         logger.info(f"Using cached embedding model for: {model_name}")
-        return _MODEL_CACHE[model_name]
+        return MODEL_CACHE[model_name]
 
     logger.info(f"Warming up embedding model: {model_name}...")
     embedder = EmbeddingModel(model_name=model_name, device=device)
@@ -31,7 +31,7 @@ def warm_up_embedder(model_name: str, device: str = None) -> EmbeddingModel:
     embedder.warm_up()
     
     # Cache the warmed-up model for later use.
-    _MODEL_CACHE[model_name] = embedder
+    MODEL_CACHE[model_name] = embedder
     logger.info(f"Embedding model '{model_name}' warmed up and cached.")
     return embedder
 
@@ -40,10 +40,10 @@ def warm_up_query_model(model_name: str, device: str = None) -> QueryModel:
     Create and warm up the QueryModel, returning the ready instance.
     If model_name is None, we rely on the config to provide it.
     """
-    global _MODEL_CACHE
-    if model_name in _MODEL_CACHE:
+    global MODEL_CACHE
+    if model_name in MODEL_CACHE:
         logger.info(f"Using cached query model for: {model_name}")
-        return _MODEL_CACHE[model_name]
+        return MODEL_CACHE[model_name]
 
     logger.info(f"Warming up embedding model: {model_name}...")
     query_model = QueryModel(model_name=model_name, device=device)
