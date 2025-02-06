@@ -11,6 +11,14 @@ from src.util.clean_doc_queue import CleanDocQueue
 from src.util. get_agent_config import load_agent_config
 from initializers import warm_up_embedder, warm_up_query_model
 
+# --- FastAPI imports ---
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+# Import your router from controllers
+from controllers.upload_controller import router as upload_router
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -103,6 +111,25 @@ def monitor_embedding_consumers(clean_doc_queue: CleanDocQueue, embedder):
                     logger.info(f"Spawned embedding consumer. Total: {len(embedding_consumer_threads)}")
         time.sleep(5)
         
+def start_fastapi_server():
+    """
+    Create and run the FastAPI server. This runs in its own thread so
+    we don't block the main thread (which has the consumer loops).
+    """
+    api_app = FastAPI()
+
+    # 1) Mount the React build directory:
+    #    Make sure you have run `npm run build` or `yarn build`
+    #    so that 'frontend/build' contains index.html and static assets.
+    api_app.mount("/", StaticFiles(directory="frontend/build", html=True), name="react-frontend")
+
+    # 2) Include your /upload route (and any other routes) from controllers.
+    api_app.include_router(upload_router, prefix="/api")  
+    # Using prefix="/api" means the /upload route will actually be at /api/upload
+
+    # 3) Start Uvicorn server
+    uvicorn.run(api_app, host="0.0.0.0", port=8000, log_level="info")
+
 
 def main():
     ### Start the Document Cleaning Pipeline ###
@@ -146,12 +173,14 @@ def main():
     embedding_scaling_thread.start()
     logger.info("Started embedding consumer scaling monitor.")
 
-    # Here you can also start your API server or other parts of your application.
-    # the api server will take in uploads and settings chages for the pipline
-    # For example, if using FastAPI, you might start it here or via another process.
-    # This main loop simply keeps the program alive.
+    # --- 3) Spin up the FastAPI server in a separate thread ---
+    #     so that the consumer loops remain running in the main thread.
+    api_thread = Thread(target=start_fastapi_server, daemon=True)
+    api_thread.start()
+
+    # --- 4) Keep the main thread alive (along with all daemon threads) ---
     while True:
-        pass
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
