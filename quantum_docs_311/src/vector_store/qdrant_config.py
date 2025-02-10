@@ -210,6 +210,18 @@ class QdrantManager:
         Instantiate a QdrantManager for a specific collection.
         """
         self.collection_name = collection_name
+        
+    def collection_exists(self) -> bool:
+        """
+        Return True if self.collection_name exists in Qdrant, else False.
+        """
+        try:
+            collections = self._qdrant_client.get_collections()
+            existing_names = [c.name for c in collections.collections]
+            return self.collection_name in existing_names
+        except Exception as exc:
+            logger.error(f"Error checking collection existence: {exc}")
+            return False
 
     def search(self, query_vector: List[float], top_k: int) -> List[ScoredPoint]:
         """

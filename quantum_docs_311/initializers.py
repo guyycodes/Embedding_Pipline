@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Global cache for the embedding model.
 MODEL_CACHE = {}
+QUERY_MODEL_CACHE = {}
 
 def warm_up_embedder(model_name: str, device: str = None) -> EmbeddingModel:
     """
@@ -20,6 +21,7 @@ def warm_up_embedder(model_name: str, device: str = None) -> EmbeddingModel:
     'src/util/clean_docs', and caches the instance so that subsequent calls will reuse it.
     """
     global MODEL_CACHE
+    
     if model_name in MODEL_CACHE:
         logger.info(f"Using cached embedding model for: {model_name}")
         return MODEL_CACHE[model_name]
@@ -40,15 +42,16 @@ def warm_up_query_model(model_name: str, device: str = None) -> QueryModel:
     Create and warm up the QueryModel, returning the ready instance.
     If model_name is None, we rely on the config to provide it.
     """
-    global MODEL_CACHE
-    if model_name in MODEL_CACHE:
+    global QUERY_MODEL_CACHE
+    if model_name in QUERY_MODEL_CACHE:
         logger.info(f"Using cached query model for: {model_name}")
-        return MODEL_CACHE[model_name]
+        return QUERY_MODEL_CACHE[model_name]
 
-    logger.info(f"Warming up embedding model: {model_name}...")
+    logger.info(f"Warming up query model: {model_name}...") 
     query_model = QueryModel(model_name=model_name, device=device)
     logger.info("Initializing the QueryModel...")
-
+    
+    QUERY_MODEL_CACHE[model_name] = query_model
     query_model.warm_up()
     return query_model
 
