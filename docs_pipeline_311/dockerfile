@@ -1,0 +1,32 @@
+# Use Python 3.11 on Alpine as the base image (lightweight)
+FROM python:3.11-alpine
+
+# Prevent Python from writing pyc files to disc and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies + some debugging tools WTF ARE ALL THESE FOR? DO WE NEED ALL THESE???
+RUN apk update && apk add --no-cache \
+    build-base \
+    bash \
+    curl \
+    nano \
+    iputils
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file and install dependencies
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy your entire application (including main.py, src/ folder, etc.)
+COPY . /app
+
+# Expose the port that FastAPI will run on (change to 0.0.0.0 in your code)
+EXPOSE 3009
+
+#
+# Then launch the entire pipeline by calling main.py
+CMD ["python", "main.py"]

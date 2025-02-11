@@ -174,8 +174,8 @@ def monitor_embedding_consumers(clean_doc_queue: CleanDocQueue):
 ############################################################################### 
 def create_api_app():
     api_app = FastAPI(
-        title="My API",
-        description="An API that handles config updates and uploads",
+        title="Text Processing Pipline API",
+        description="An API that handles document processing",
         version="1.0.0"
     )
     
@@ -183,7 +183,7 @@ def create_api_app():
     # api_app.mount("/", StaticFiles(directory="frontend/build", html=True), name="react-frontend")
     
     # 2) Include your /upload route (and any other routes) from controllers.
-    api_app.include_router(api_router, prefix="/api")  
+    api_app.include_router(api_router, prefix="/docs")  
     # Using prefix="/api" means the /upload route will actually be at /api/upload
 
     # 3) Add a diagnostic endpoint
@@ -211,7 +211,7 @@ def create_api_app():
     return api_app
 
 def start_fastapi_server(api_app: FastAPI):
-    uvicorn.run(api_app, host="127.0.0.1", port=8675, log_level="info")
+    uvicorn.run(api_app, host="0.0.0.0", port=3009, log_level="info")
 ###############################################################################
 # GRACEFUL SHUTDOWN LOGIC
 ###############################################################################

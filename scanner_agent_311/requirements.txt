@@ -1,0 +1,9 @@
+langgraph
+langchain-core
+langchain-community
+langchain-openai
+langchain==0.3.15
+python-dotenv
+ipython
+pillow
+graphviz

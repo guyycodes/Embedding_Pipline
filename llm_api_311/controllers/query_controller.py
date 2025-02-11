@@ -1,3 +1,5 @@
+# controllers/query_controller.py
+
 import logging
 import functools
 import asyncio
@@ -11,35 +13,26 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 
-# Your imports (adjust as needed)
-from src.model.query_model import QueryModel
+
+from src.models.query_model import QueryModel
 from src.vector_store.qdrant_config import QdrantManager
 from src.util.get_agent_config import load_agent_config
 from initializers import warm_up_query_model
 
-###############################################################################
-# LOGGER SETUP
-###############################################################################
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-###############################################################################
-# QDRANT CONNECTION POOL (OPTIONAL)
-###############################################################################
 class QdrantConnectionPool:
-    """Very naive example of a Qdrant connection pool."""
+    """Example Qdrant connection pool."""
     def __init__(self, max_size: int = 20):
         self.max_size = max_size
-        # Keyed by collection_name -> list of QdrantManager instances
         self.pool: Dict[str, list] = {}
-        # One lock per collection
         self.pool_locks: Dict[str, asyncio.Lock] = {}
 
     @asynccontextmanager
     async def get_connection(self, collection_name: str):
-        """Async context manager that yields a QdrantManager from the pool."""
         thread_name = threading.current_thread().name
-        logger.info(f"[QdrantPool] Attempting to get connection for '{collection_name}' on thread={thread_name}")
+        logger.info(f"[QdrantPool] Trying to get connection for '{collection_name}' on thread={thread_name}")
 
         if collection_name not in self.pool:
             self.pool[collection_name] = []
@@ -51,7 +44,7 @@ class QdrantConnectionPool:
                 if len(self.pool[collection_name]) < self.max_size:
                     conn = QdrantManager(collection_name)
                     self.pool[collection_name].append(conn)
-                    logger.info(f"[QdrantPool] Created new QdrantManager for '{collection_name}'. Pool size now: {len(self.pool[collection_name])}.")
+                    logger.info(f"[QdrantPool] Created new QdrantManager for '{collection_name}'.")
                 else:
                     logger.error("[QdrantPool] Connection pool exhausted!")
                     raise HTTPException(
@@ -59,14 +52,14 @@ class QdrantConnectionPool:
                         detail=f"Connection pool for '{collection_name}' is exhausted."
                     )
             connection = self.pool[collection_name].pop()
-            logger.info(f"[QdrantPool] Got connection from pool for '{collection_name}'. Remaining in pool: {len(self.pool[collection_name])}.")
+            logger.info(f"[QdrantPool] Got connection from pool for '{collection_name}'.")
 
         try:
             yield connection
         finally:
             async with self.pool_locks[collection_name]:
                 self.pool[collection_name].append(connection)
-                logger.info(f"[QdrantPool] Returned connection to pool for '{collection_name}'. Pool size now: {len(self.pool[collection_name])}.")
+                logger.info(f"[QdrantPool] Returned connection to pool for '{collection_name}'.")
 
 ###############################################################################
 # GLOBAL STATE
@@ -91,7 +84,7 @@ global_state = GlobalState()
 ###############################################################################
 class QARequest(BaseModel):
     query: str
-    collection_name: str = "document_vectors"  # Adjust as needed
+    collection_name: str = "document_vectors"
 
 ###############################################################################
 # HELPER FUNCTIONS

@@ -4,7 +4,6 @@ docx2txt
 fastapi
 fpdf2
 huggingface-hub
-jupyter
 pillow
 pdfplumber
 pyyaml

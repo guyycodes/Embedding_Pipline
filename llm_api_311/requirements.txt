@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+PyYAML
+aiofiles
+requests
+qdrant-client
+torch
+transformers
+httpx
+huggingface-hub
+pillow
+torch
+torchaudio
+torchvision

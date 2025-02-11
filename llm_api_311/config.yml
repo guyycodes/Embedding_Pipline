@@ -1,0 +1,18 @@
+agent:
+  model_name: guymorganb/e5-large-v2-4096-lsg-patched
+  query_model:
+    device: mps
+    max_tokens: 4096
+    timeout: 60
+    top_k: 5
+qdrant:
+  collection: document_vectors
+  cloud_host: cloud-endpoint
+  cloud_port: 443
+  cloud_api_key: ''
+  prefer_grpc: false
+  dimension: 1024
+  host: localhost
+  mode: LOCAL
+  port: 6333
+  timeout: 300

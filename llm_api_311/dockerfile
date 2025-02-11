@@ -1,0 +1,35 @@
+# Use Python 3.11 on Alpine as the base image (lightweight)
+FROM python:3.11-alpine
+
+# Prevent Python from writing pyc files & enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Update package index & install minimal system packages:
+#   - build-base for compiling any dependencies with C-extensions
+#   - curl, nano, iputils (ping) for diagnostics
+RUN apk update && apk add --no-cache \
+    build-base \
+    bash \
+    curl \
+    nano \
+    iputils
+
+# Set a working directory
+WORKDIR /app
+
+# Copy only your requirements first (for efficient Docker caching)
+COPY requirements.txt /app/
+
+# Upgrade pip & install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Then copy the rest of your application
+COPY . /app
+
+# Expose the FastAPI port (adjust if needed)
+EXPOSE 8675
+
+# Run main.py as default
+CMD ["python", "main.py"]
