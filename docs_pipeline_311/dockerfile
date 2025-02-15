@@ -1,32 +1,60 @@
-# Use Python 3.11 on Alpine as the base image (lightweight)
-FROM python:3.11-alpine
+# Use a Debian-based Python 3.11 slim image instead of Alpine python:3.11-slim) use glibc instead of musl.
+# PyTorch and other packages often provide precompiled wheels only for glibc-based distributions
+FROM python:3.11-slim
 
-# Prevent Python from writing pyc files to disc and enable unbuffered logging
+# Prevent Python from writing pyc files to disk & enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies + some debugging tools WTF ARE ALL THESE FOR? DO WE NEED ALL THESE???
-RUN apk update && apk add --no-cache \
-    build-base \
+# Install system dependencies & some debugging tools
+# (Feel free to remove any you don't actually need)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     bash \
     curl \
     nano \
-    iputils
+    iputils-ping \
+    clang \
+    llvm \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    python3-dev \
+    libopenblas-dev \
+    git \
+    cmake \
+    gfortran \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
+# Create a venv named 'docs_pipeline_311'
+RUN python -m venv /app/docs_pipeline_311
+
+# Make sure we use the virtualenv
+# This PATH modification ensures that pip and python commands will come from the docs_pipeline_311 virtual environment rather than the system Python
+# ENV PATH=... approach is the correct Docker way to achieve the same result as source activate would give you in a regular shell
+ENV PATH="/app/docs_pipeline_311/bin:$PATH"
+
+ENV BLIS_ARCH="generic"
+
+# Copy and install Python dependencies into the venv
 COPY requirements.txt /app/
+
+# Install dependencies with special handling for ARM architecture
 RUN pip install --upgrade pip && \
+    # First install numpy and other scientific packages
+    pip install --no-cache-dir numpy cython && \
+    # Then install the rest of the requirements
     pip install --no-cache-dir -r requirements.txt
 
-# Copy your entire application (including main.py, src/ folder, etc.)
+# Copy the rest of your application (including main.py, src/ folder, etc.)
 COPY . /app
 
-# Expose the port that FastAPI will run on (change to 0.0.0.0 in your code)
+# Expose the port that FastAPI will run on (change accordingly if needed)
 EXPOSE 3009
 
-#
-# Then launch the entire pipeline by calling main.py
+# Launch the entire pipeline by calling main.py
 CMD ["python", "main.py"]

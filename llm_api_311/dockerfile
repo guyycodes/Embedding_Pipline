@@ -1,5 +1,5 @@
-# Use Python 3.11 on Alpine as the base image (lightweight)
-FROM python:3.11-alpine
+# Use a Debian-based Python 3.11 slim image
+FROM python:3.11-slim
 
 # Prevent Python from writing pyc files & enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -8,22 +8,36 @@ ENV PYTHONUNBUFFERED=1
 # Update package index & install minimal system packages:
 #   - build-base for compiling any dependencies with C-extensions
 #   - curl, nano, iputils (ping) for diagnostics
-RUN apk update && apk add --no-cache \
-    build-base \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    nano \
+    iputils-ping \
+    libopenblas-dev \
+    gfortran \
+    pkg-config \
     bash \
     curl \
-    nano \
-    iputils
+ && rm -rf /var/lib/apt/lists/*
 
 # Set a working directory
 WORKDIR /app
 
-# Copy only your requirements first (for efficient Docker caching)
+# Create a venv named 'docs_pipeline_311'
+RUN python -m venv /app/llm_api_311
+
+# Make sure we use the virtualenv
+ENV PATH="/app/llm_api_311/bin:$PATH"
+ENV BLIS_ARCH="generic"
+
+# Copy and install Python dependencies into the venv
 COPY requirements.txt /app/
 
-# Upgrade pip & install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    # Install numpy and other scientific packages first
+    pip install --no-cache-dir numpy cython && \
+    # Then install the rest of the requirements
+    pip install --no-cache-dir -r requirements.txt
 
 # Then copy the rest of your application
 COPY . /app

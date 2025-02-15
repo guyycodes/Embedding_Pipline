@@ -1,0 +1,17 @@
+{
+  "graphs": {
+    "agent": "./agent.py:graph"
+  },
+  "dockerfile_lines": [
+    "COPY entrypoint.sh /entrypoint.sh",
+    "EXPOSE 5900"
+  ],
+  "env": ".env",
+  "python_version": "3.11",
+  "dependencies": [
+    "."
+  ],
+  "env_vars": {
+
+  }
+}

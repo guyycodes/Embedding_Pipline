@@ -10,7 +10,8 @@ import httpx  # Use httpx for async POST forwarding
 
 router = APIRouter()
 
-DOC_PIPELINE_URL = "http://127.0.0.1:3009/docs/upload/documents"
+# points the request to be forwarded to the other container
+DOC_PIPELINE_URL = "http://172.17.0.5:3009/docs/upload/documents"
 
 @router.post("/documents")
 async def upload_file(

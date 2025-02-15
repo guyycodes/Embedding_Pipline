@@ -2,12 +2,12 @@ agent:
   model_name: guymorganb/e5-large-v2-4096-lsg-patched
   embedding_model:
     batch_size: 32
-    device: mps
+    device: cpu
     max_tokens: 4096
     timeout: 60
     will_embed_docs: false
   query_model:
-    device: mps
+    device: cpu
     max_tokens: 4096
     timeout: 60
     top_k: 5

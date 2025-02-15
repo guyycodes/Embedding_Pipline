@@ -17,7 +17,7 @@ import os
 # Ensure the project root is in the Python path.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.model.query_model import QueryModel  # Assuming you still have QueryModel
+from src.models.query_model import QueryModel  # Assuming you still have QueryModel
 from src.util.get_agent_config import load_agent_config
 from src.vector_store.qdrant_config import QdrantManager
 

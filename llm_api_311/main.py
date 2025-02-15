@@ -38,7 +38,7 @@ def create_api_app() -> FastAPI:
     )
 
     # Include your controllers under a single router prefix
-    api_app.include_router(api_router, prefix="/docs")
+    api_app.include_router(api_router, prefix="/api")
 
     @api_app.get("/health")
     def health_check():

@@ -2,7 +2,7 @@
 
 import logging
 import os
-from src.model.query_model import QueryModel
+from src.models.query_model import QueryModel
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

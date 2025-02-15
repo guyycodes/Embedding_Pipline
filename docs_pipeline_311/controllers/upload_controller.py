@@ -10,12 +10,7 @@ from typing import Optional
 router = APIRouter()
 
 # Base directory for "dirty_documents" - adjust to your actual path
-BASE_DIR = "/Users/guybeals/Desktop/GitHub_Repos/Quantum_Ass/docs_pipline_311/src/util/dirty_documents"
-
-# curl -X POST "http://127.0.0.1:8675/api/upload/documents" \
-#   -F file=@/Users/guybeals/Downloads/paper04_textual_resource.pdf
-
-# {"message":"File uploaded successfully","filename":"paper04_textual_resource.pdf","saved_to":"/Users/guybeals/Desktop/GitHub_Repos/Quantum_Ass/docs_pipline_311/src/util/dirty_documents/pdf/paper04_textual_resource.pdf"}%    
+BASE_DIR = "/app/src/util/dirty_documents"
 
 
 @router.post("/documents")

@@ -10,6 +10,7 @@ transformers
 httpx
 huggingface-hub
 pillow
-torch
 torchaudio
 torchvision
+python-multipart
+questionary
