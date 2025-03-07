@@ -219,11 +219,12 @@ class GraphNodes:
 
     def __init__(self):
         # Initialize a single instance of your LLM
-        self.llm = ChatOpenAI(model="gpt-4")
+        self.llm = ChatOpenAI(model="gpt-4.5-preview")
+        self.cheapllm = ChatOpenAI(model="gpt-4o")
 
     def rewrite_input(self, state: SimpleGraphState) -> SimpleGraphState:
         user_input = state["user_input"]
-        prompt = f"Rewrite for clarity (include any relevant URLs or search terms):\n\n{user_input}"
+        prompt = f"The user will ask for help with coding problems and may provide code, using software engineering terminology please do the following: Rewrite the users text query about the code more clearly, ensure all the code apart of the query gets included with your optimized response:\n\n{user_input}"
         rewritten_msg = self.llm.invoke([{"role": "user", "content": prompt}])
         return {"rewritten_input": rewritten_msg}
 
@@ -282,7 +283,7 @@ class GraphNodes:
         content_str = content_obj.content if hasattr(content_obj, "content") else str(content_obj)
 
         prompt = f"""
-            Based on the following, provide a final response for the user:
+            Based on the following, provide a proper response to the user:
 
             Content: {content_str}
             Error: {error if error else 'None'}
@@ -301,19 +302,19 @@ def build_graph():
     nodes = GraphNodes()
 
     # Subgraph for browser
-    browser_subgraph = StateGraph(input=BrowserState, output=BrowserState)
-    browser_subgraph.add_node("browser_interaction", nodes.browser_interaction)
-    browser_subgraph.add_node("analyze_browser", nodes.analyze_browser_result)
-    browser_subgraph.add_edge(START, "browser_interaction")
-    browser_subgraph.add_edge("browser_interaction", "analyze_browser")
-    browser_subgraph.add_edge("analyze_browser", END)
-    compiled_browser_subgraph = browser_subgraph.compile()
+    # browser_subgraph = StateGraph(input=BrowserState, output=BrowserState)
+    # browser_subgraph.add_node("browser_interaction", nodes.browser_interaction)
+    # browser_subgraph.add_node("analyze_browser", nodes.analyze_browser_result)
+    # browser_subgraph.add_edge(START, "browser_interaction")
+    # browser_subgraph.add_edge("browser_interaction", "analyze_browser")
+    # browser_subgraph.add_edge("analyze_browser", END)
+    # compiled_browser_subgraph = browser_subgraph.compile()
 
     # Main graph
     main_graph = StateGraph(input=SimpleGraphState, output=SimpleGraphState)
     main_graph.add_node("rewrite_input", nodes.rewrite_input)
     main_graph.add_node("classify_browser_need", nodes.classify_browser_need)
-    main_graph.add_node("browser_subgraph", compiled_browser_subgraph)
+    # main_graph.add_node("browser_subgraph", compiled_browser_subgraph)
     main_graph.add_node("final_response", nodes.generate_final_response)
 
     # Flow:
@@ -322,14 +323,20 @@ def build_graph():
     main_graph.add_edge("rewrite_input", "classify_browser_need")
 
     # Conditional route
+    # def route_based_on_need(state: SimpleGraphState) -> str:
+    #     if state.get("needs_browser", False):
+    #         return "browser_subgraph"
+    #     else:
+    #         return "final_response"
+    
     def route_based_on_need(state: SimpleGraphState) -> str:
-        if state.get("needs_browser", False):
-            return "browser_subgraph"
-        else:
-            return "final_response"
+        # if state.get("needs_browser", False):
+        #     return "browser_subgraph"
+        # else:
+        return "final_response"
 
     main_graph.add_conditional_edges("classify_browser_need", route_based_on_need)
-    main_graph.add_edge("browser_subgraph", "final_response")
+    # main_graph.add_edge("browser_subgraph", "final_response")
     main_graph.add_edge("final_response", END)
 
     graph = main_graph.compile()
