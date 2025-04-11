@@ -224,7 +224,34 @@ class GraphNodes:
 
     def rewrite_input(self, state: SimpleGraphState) -> SimpleGraphState:
         user_input = state["user_input"]
-        prompt = f"The user will ask for help with coding problems and may provide code, using software engineering terminology please do the following: Rewrite the users text query about the code more clearly, ensure all the code apart of the query gets included with your optimized response:\n\n{user_input}"
+        prompt = f"The user will ask for help with problems and may provide code, using software engineering terminology please do the following: Rewrite the users text query about the code more clearly, ensure all the code apart of the query gets included with your optimized response:\n\n{user_input}"
+                # prompt = f"""You are a software engineering assistant.
+
+        #         When analyzing the user's code problem:
+        #         1. Interpret their query using precise technical terminology
+        #         2. Rewrite their question to be more specific and actionable
+        #         3. Include ALL original code snippets in your response without modification
+
+        #         Focus on clarifying the technical intent while preserving every line of code.
+
+        #         User query:
+        #         {user_input}"""
+        # prompt = f"""You are an assistant, the user may prompt you and also supply cntent they are needing help with.
+
+        #         Identify the users prompt and distinguish it from the users supplied content, then:
+        #         - Identify what the user wants
+        #         - If there is any mis-spelling or lack of clarity to the users prompt, rewrite and optimize the users prompt.
+        #         - Preserve the original intent
+        #         - Preserve the orginal content
+        #         - When finished, your response will be passed to greater a.i model, ensure you are not adding in garbage information for the next a.i model.
+
+        #         If the query is already clear:
+        #         - Pass it through unchanged
+
+        #         IMPORTANT: Always include ALL original content/text the user provided in your response.
+
+        #         User query:
+        #         {user_input}"""
         rewritten_msg = self.llm.invoke([{"role": "user", "content": prompt}])
         return {"rewritten_input": rewritten_msg}
 

@@ -7,6 +7,10 @@ import httpx  # Use httpx for async POST forwarding
 # curl -X POST "http://127.0.0.1:8675/api/upload/documents" \
 #   -F file=@/Users/guybeals/Downloads/paper04_textual_resource.pdf \
 #   -F subfolder="pdf"
+# OR
+#curl -X POST "http://127.0.0.1:8675/api/upload/documents" \
+#  -F file=@/Users/guybeals/Desktop/GitHub_Repos/Embedding_Pipline/docs_pipeline_311/msmarco.tsv \
+#  -F subfolder="tsv"
 
 router = APIRouter()
 
