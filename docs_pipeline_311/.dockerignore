@@ -1,0 +1,29 @@
+# Exclude the virtual environment
+pipeline_311/
+
+# Byte-compiled files and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git repository files
+.git/
+.gitignore
+
+# Documentation files (optional)
+README.md
+*.md
+
+# Local configurations and temporary files
+*.swp
+*.swo
+.env
+.env.*
+
+# OS-specific files
+.DS_Store
+
+# Other potential build artifacts
+build/
+dist/
